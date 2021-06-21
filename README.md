@@ -7,7 +7,7 @@ sudo yum install epel-release
 * OR  
 sudo dnf install epel-release  
 
-*Terminal commands  
+## Terminal commands  
 - vboxmanage list vms  
 - vboxmanage list runningvms  
 - vboxmanage startvm <name or UUID>  
