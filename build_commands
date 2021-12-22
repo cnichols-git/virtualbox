@@ -1,0 +1,51 @@
+https://www.andreafortuna.org/2019/10/24/how-to-create-a-virtualbox-vm-from-command-line/
+
+# How to build a virtualbox system in the commandline  
+VBoxManage createvm --name [MACHINE NAME] --ostype [Os Type, ex: "Debian_64"]  
+
+### Create 1Gb RAM and 1 network card using Bridged 
+VBoxManage modifyvm [MACHINE NAME] --ioapic on                     
+VBoxManage modifyvm [MACHINE NAME] --memory 1024 --vram 128       
+VBoxManage modifyvm [MACHINE NAME] --nic1 brigded 
+
+### Create the Disk and connect the CD ISO
+
+
+
+all the things:
+
+to find ostypes :  
+`# VBoxManage list ostypes`
+
+> # root@office:/home/chris/Storage/Software/ISOs# VBoxManage list ostypes | grep -i redhat
+> ID:          RedHat
+> ID:          RedHat_64
+
+#!/bin/bash
+MACHINENAME=$1
+
+# Download debian.iso
+if [ ! -f /home/chris/Storage/Software/ISOs/CentOS-Stream-8-x86_64-20210316-dvd1.iso ]; then
+    wget https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-9.9.0-amd64-netinst.iso -O debian.iso
+fi
+
+#Create VM
+VBoxManage createvm --name $MACHINENAME --ostype "CentOS-Stream-8" --register --basefolder `pwd`
+#Set memory and network
+VBoxManage modifyvm $MACHINENAME --ioapic on
+VBoxManage modifyvm $MACHINENAME --memory 1024 --vram 128
+VBoxManage modifyvm $MACHINENAME --nic1 nat
+#Create Disk and connect Debian Iso
+VBoxManage createhd --filename `pwd`/$MACHINENAME/$MACHINENAME_DISK.vdi --size 200000 --format VDI
+VBoxManage storagectl $MACHINENAME --name "SATA Controller" --add sata --controller IntelAhci
+VBoxManage storageattach $MACHINENAME --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium  `pwd`/$MACHINENAME/$MACHINENAME_DISK.vdi
+VBoxManage storagectl $MACHINENAME --name "IDE Controller" --add ide --controller PIIX4
+VBoxManage storageattach $MACHINENAME --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium `pwd`//home/chris/Storage/Software/ISOs/CentOS-Stream-8-x86_64-20210316-dvd1.iso
+VBoxManage modifyvm $MACHINENAME --boot1 dvd --boot2 disk --boot3 none --boot4 none
+
+#Enable RDP
+VBoxManage modifyvm $MACHINENAME --vrde on
+VBoxManage modifyvm $MACHINENAME --vrdemulticon on --vrdeport 10001
+
+#Start the VM
+VBoxHeadless --startvm $MACHINENAME
