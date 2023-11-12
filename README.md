@@ -11,7 +11,6 @@ sudo dnf install epel-release
 - vboxmanage list vms  
 - vboxmanage list runningvms  
 - vboxmanage startvm <name or UUID>  
-- VBoxManage controlvm <vm> poweroff/reset
-
+- VBoxManage controlvm <vm> poweroff/reset  
 Power off a vm  
 VBoxManage controlvm "Ubuntu Server" poweroff --type headless  
